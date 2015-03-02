@@ -74,7 +74,11 @@
                     case 'open':
                     case 'reset':
                         resetCanvas();
-                        $canvas.css({backgroundImage: 'url(' + $input.val() + ')'});
+                        if ($input.val()) {
+                            $canvas.css({backgroundImage: 'url(' + $input.val() + ')'});
+                        } else {
+                            $canvas.css({backgroundImage: 'none'});
+                        }
                         break;
 
                     case 'clear':

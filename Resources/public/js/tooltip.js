@@ -7,6 +7,7 @@
         var $target = $(e.target);
 
         $target.find('[data-toggle="tooltip"]').tooltip();
+        $target.find('[data-toggle="popover"]').popover();
     });
 
 })(jQuery);
