@@ -1,0 +1,31 @@
+{% macro list_item(label, route, parameters, active) %}
+    {%- spaceless %}
+        {% set active_route = app.request.get('route')|default(app.request.get('_route')) %}
+        {% set url = path(route, parameters|default({})) %}
+        {% set active = route == active_route or active|default(false) %}
+
+        {% import _self as navi %}
+        {{ navi.raw_list_item(label, url, active) }}
+    {% endspaceless %}
+{% endmacro %}
+
+{% macro raw_list_item(label, href, active) %}
+    {%- spaceless %}
+        <li role="presentation"{% if active|default(false) %} class="active"{% endif %}>
+            <a role="menuitem" tabindex="-1" href="{{ href }}">
+                {{- label -}}
+            </a>
+        </li>
+    {% endspaceless %}
+{% endmacro %}
+
+{% macro disabled_list_item(label, reason) %}
+    {%- spaceless %}
+        <li role="presentation" class="disabled">
+            <a role="menuitem" tabindex="-1" href="#"
+                    {%- if reason %} title="{{ reason }}" data-toggle="tooltip" data-placement="left"{% endif %}>
+                {{- label -}}
+            </a>
+        </li>
+    {% endspaceless -%}
+{% endmacro disabled_list_item %}

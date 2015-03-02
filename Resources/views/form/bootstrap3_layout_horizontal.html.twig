@@ -1,0 +1,89 @@
+{% extends 'HnBootstrapLayoutBundle:form:bootstrap3_layout.html.twig' %}
+
+{% block form_row %}
+    {%- spaceless %}
+        {% set label_width = label_width|default(4) %}
+        {#{% set attr = attr|merge({ 'class': (attr.class|default('') ~ ' form-control')|trim }) %}#}
+        <div class="form-group{% if errors|length > 0 %} has-error{% endif %}">
+            {% set label_class = (label_attr.class|default('') ~ ' col-sm-' ~ label_width ~ ' control-label')|trim %}
+            {% set label_attr = label_attr|merge({ label_attr: { class: label_class } }) %}
+            {{ form_label(form, null, label_attr) }}
+            <div class="col-sm-{{ 12 - label_width }}">
+                {{ form_widget(form, { attr: attr }) }}
+                {{ form_errors(form) }}
+            </div>
+        </div>
+    {% endspaceless %}
+{% endblock %}
+
+{% block checkbox_row %}
+    {%- spaceless %}
+        {% set label_width = label_width|default(4) %}
+        <div class="form-group{% if errors|length > 0 %} has-error{% endif %}">
+            <div class="col-sm-{{ 12 - label_width }} col-sm-offset-{{ label_width }}">
+                {{ parent() }}
+            </div>
+        </div>
+    {% endspaceless %}
+{% endblock checkbox_row %}
+
+{% block button_row %}
+    {%- spaceless %}
+        {% set label_width = label_width|default(4) %}
+        {#{% set attr = attr|merge({ 'class': (attr.class|default('') ~ ' form-control')|trim }) %}#}
+        <div class="form-group">
+            <div class="col-sm-{{ 12 - label_width }} col-sm-offset-{{ label_width }}">
+                {{ form_widget(form) }}
+            </div>
+        </div>
+    {% endspaceless %}
+{% endblock button_row %}
+
+{% block choice_widget_expanded %}
+    {%- spaceless %}
+        {% for child in form %}
+            <div {{ block('widget_container_attributes') }}>
+                {{ form_widget(child) }}
+                {{ form_label(child) }}
+            </div>
+        {% endfor %}
+    {% endspaceless %}
+{% endblock choice_widget_expanded %}
+
+{# symfony needed to hardcode the ":" in the widget... this is my answer #}
+{% block time_widget %}
+    {%- spaceless %}
+        {% if widget == 'single_text' %}
+            {{ block('form_widget_simple') }}
+        {% else %}
+            {#{% set vars = {}|merge(widget == 'text' ? { 'attr': { 'size': 1 }} : {}) %}#}
+            {#{% set class_name = attr.class|default('') ~ ' input-group' %}#}
+            {#{% set attr = attr|default({})|merge({ class: class_name }) %}#}
+            <div {{ block('widget_container_attributes') }}>
+                {%- spaceless %}
+                    {{ form_widget(form.hour, widget_vars) }}
+                    {% if with_minutes %}{{ form_widget(form.minute, widget_vars) }}{% endif %}
+                    {% if with_seconds %}{{ form_widget(form.second, widget_vars) }}{% endif %}
+                {% endspaceless %}
+            </div>
+        {% endif %}
+    {% endspaceless %}
+{% endblock %}
+
+{% block form_start %}
+    {% spaceless %}
+        {% set class_name = attr.class|default('') ~ ' form-horizontal' %}
+        {% set attr = attr|default({})|merge({ class: class_name, role: 'form' }) %}
+        {% set method = method|upper %}
+        {% if method in ["GET", "POST"] %}
+            {% set form_method = method %}
+        {% else %}
+            {% set form_method = "POST" %}
+        {% endif %}
+        <form name="{{ form.vars.name }}"
+              method="{{ form_method|lower }}" action="{{ action }}"{% for attrname, attrvalue in attr %} {{ attrname }}="{{ attrvalue }}"{% endfor %}{% if multipart %} enctype="multipart/form-data"{% endif %}>
+        {% if form_method != method %}
+            <input type="hidden" name="_method" value="{{ method }}"/>
+        {% endif %}
+    {% endspaceless %}
+{% endblock form_start %}

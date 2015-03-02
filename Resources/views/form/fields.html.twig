@@ -1,0 +1,311 @@
+{% block form_label_text %}
+    {%- if label is empty -%}
+        {%- set label = name|humanize -%}
+    {%- endif -%}
+    {{- label|trans({}, translation_domain) -}}
+{% endblock form_label_text %}
+
+{% block hn_bootstrap_date_widget %}
+    {%- spaceless %}
+        <div class="date{% if type == 'text' %} input-group js-datepicker{% endif %}">
+            {% if type == 'text' %}
+                <span class="input-group-addon">
+                    <span class="glyphicon glyphicon-calendar"></span>
+                </span>
+            {% endif %}
+            {{ form_widget(form) }}
+        </div>
+    {% endspaceless %}
+{% endblock hn_bootstrap_date_widget %}
+
+{% block hn_bootstrap_time_widget -%}
+    {%- spaceless %}
+        {% if widget == 'single_text' %}
+            <div class="time{% if type == 'text' %} input-group js-datepicker{% endif %}">
+                {% if type == 'text' %}
+                    <span class="input-group-addon">
+                        <span class="glyphicon glyphicon-time"></span>
+                    </span>
+                {% endif %}
+                {{ form_widget(form) }}
+            </div>
+        {% elseif widget == 'choice' %}
+            {% set vars = widget == 'text' ? { 'attr': { 'size': 1 }} : {} %}
+            <div {{ block('widget_container_attributes') }}>
+            {% set col_size = 12 %}
+            {% if with_minutes %}{% set col_size = col_size / 2 %}{% endif %}
+            {% if with_seconds %}{% set col_size = col_size / 2 %}{% endif %}
+            <div class="row time" style="margin: 0">
+                <div class="col-xs-{{ col_size }} hour" style="padding: 0">
+                    {{ form_widget(form.hour, vars) }}
+                </div>
+                {% if with_minutes %}
+                    <div class="col-xs-{{ col_size }} minute" style="padding: 0">
+                        {{ form_widget(form.minute, vars) }}
+                    </div>
+                {% endif %}
+                {% if with_seconds %}
+                    <div class="col-xs-{{ col_size }} secound" style="padding: 0">
+                        {{ form_widget(form.second, vars) }}
+                    </div>
+                {% endif %}
+            </div>
+            </div>
+        {% else -%}
+            {{ form_widget(form) }}
+        {%- endif %}
+    {% endspaceless %}
+{%- endblock hn_bootstrap_time_widget %}
+
+{% block hn_bootstrap_datetime_widget %}
+    {%- spaceless %}
+        {% if widget == 'single_text' %}
+            <div class="input-group datetime{% if type == 'text' %} js-datepicker{% endif %}">
+                <span class="input-group-addon">
+                    <span class="glyphicon glyphicon-calendar"></span>
+                </span>
+                {{- block('form_widget_simple') -}}
+            </div>
+        {% else %}
+            <div {{ block('widget_container_attributes') }}>
+                <div class="row datetime" style="margin: 0">
+                    <div class="col-xs-6 date" style="padding: 0">
+                        {{- form_widget(form.date) -}}
+                        {{- form_errors(form.date) -}}
+                    </div>
+                    <div class="col-xs-6 time" style="padding: 0">
+                        {{- form_widget(form.time) -}}
+                        {{- form_errors(form.time) -}}
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    {% endspaceless %}
+{% endblock hn_bootstrap_datetime_widget %}
+
+{% block hn_bootstrap_datetime_row %}
+    {{- form_row(form, { simulated_input: true }) -}}
+{% endblock hn_bootstrap_datetime_row %}
+
+{% block hn_bootstrap_date_range_widget %}
+    {%- spaceless %}
+        <div {{ block('widget_container_attributes') }}>
+            <div class="row">
+                <div class="col-sm-6">
+                    {{ form_row(attribute(form, form.vars.start_field), start_options|default({})) }}
+                </div>
+                <div class="col-sm-6">
+                    {{ form_row(attribute(form, form.vars.end_field), end_options|default({})) }}
+                </div>
+            </div>
+        </div>
+    {% endspaceless -%}
+{% endblock hn_bootstrap_date_range_widget %}
+
+{% block hn_bootstrap_date_range_row %}
+    {{- form_widget(form) -}}
+    {{- form_errors(form) -}}
+{% endblock hn_bootstrap_date_range_row %}
+
+{% block hn_bootstrap_choice_with_text_row %}
+    {{ form_row(form, {simulated_input: true}) }}
+{% endblock hn_bootstrap_choice_with_text_row %}
+
+{% block hn_bootstrap_choice_with_text_widget %}
+    {%- spaceless %}
+        {% set choice_form = attribute(form, form.vars.choice_name) %}
+        {% set text_form = attribute(form, form.vars.text_name) %}
+
+        {% if form.vars.expanded %}
+            {% set script_cond = "0<=$.inArray($(this).find(':input:checked').val(), " ~ form.vars.text_choice_values|json_encode ~ ")" %}
+        {% else %}
+            {% set script_cond = "0<=$.inArray($(this).find(':input').val(), " ~ form.vars.text_choice_values|json_encode ~ ")" %}
+        {% endif %}
+
+        {% if form.vars.message_required %}
+            {% set script = "var b=" ~ script_cond ~ ";$('#" ~ text_form.vars.id ~ "').prop('required',b).parent().toggle(b)" %}
+        {% else %}
+            {% set script = "$('#" ~ text_form.vars.id ~ "').parent().toggle(" ~ script_cond ~ ")" %}
+        {% endif %}
+
+        {#needs to be fixed#}
+        {% set field_visible = choice_form.vars.data in form.vars.text_choices %}
+
+        <div {{ block('widget_container_attributes') }}>
+            <div class="choice_with_text-choice" onchange="{{ script|e }}">
+                {{ form_widget(choice_form) }}
+            </div>
+            <div class="choice_with_text-text"{% if not field_visible %} hidden="hidden"{% endif %}>
+                {{ form_widget(text_form, { 'required': field_visible and form.vars.message_required }) }}
+            </div>
+        </div>
+    {% endspaceless -%}
+{% endblock hn_bootstrap_choice_with_text_widget %}
+
+{% block hn_bootstrap_choice_with_text_errors %}
+    {%- spaceless %}
+        {{ form_errors(attribute(form, form.vars.choice_name)) }}
+        {{ form_errors(attribute(form, form.vars.text_name)) }}
+    {% endspaceless -%}
+{% endblock hn_bootstrap_choice_with_text_errors %}
+
+{% block hn_bootstrap_rte_widget %}
+    {%- spaceless %}
+        {% set className = (attr.class|default('') ~ ' hn-layout-rte')|trim %}
+        {% set attr = attr|merge({
+        'class': className,
+        'data-tinymce-options': form.vars.tinymceOptions|json_encode
+        }) %}
+        {{ block('textarea_widget') }}
+    {% endspaceless -%}
+{% endblock %}
+
+{% block hn_bootstrap_text_variables_widget %}
+    {%- spaceless %}
+        {% set attr = attr|merge({ class: attr.class|default('') ~ ' text-variables-type' }) %}
+        <div {{ block('widget_container_attributes') }}>
+            <div class="row">
+                <div class="col-sm-8">
+                    {{ form.vars.text|raw }}
+                </div>
+                <div class="col-sm-4">
+                    {{ form_widget(form) }}
+                    {{ form_errors(form) }}
+                </div>
+            </div>
+        </div>
+    {% endspaceless -%}
+{% endblock hn_bootstrap_text_variables_widget %}
+
+{% block hn_bootstrap_sketch_image %}
+    <img src="{{ form.vars.value }}" alt="" width="{{ form.vars.width }}" height="{{ form.vars.height }}"/>
+{% endblock hn_bootstrap_sketch_image %}
+
+{% block hn_bootstrap_sketch_canvas %}
+    {%- if read_only or disabled -%}
+        {{ block('hn_bootstrap_sketch_image') }}
+    {%- else -%}
+        <canvas width="{{ form.vars.width }}" height="{{ form.vars.height }}"
+                data-default-color="{{ form.vars.default_color }}"
+                data-default-size="{{ form.vars.default_size }}"
+                data-quality="{{ form.vars.quality / 100 }}"></canvas>
+    {%- endif -%}
+{% endblock hn_bootstrap_sketch_canvas %}
+
+{% block hn_bootstrap_sketch_widget %}
+    <div {{ block('widget_container_attributes') }}>
+        {% if form.vars.use_modal %}
+            <button type="button" class="btn btn-default"
+                    {%- if disabled %} disabled="disabled"
+                    {%- else %} data-toggle="modal" data-target="#{{ id }}_modal"{% endif -%}
+                    data-sketch="open">
+                {% set style -%}
+                background-color: {{ form.vars.background_color }}{{ ';' -}}
+                width: {{ form.vars.small_width }}px{{ ';' -}}
+                height: {{ form.vars.small_height }}px{{ ';' -}}
+                {% endset %}
+                <div class="preview" style="{{ style }}">
+                    {% if read_only or disabled %}
+                        {{ block('hn_bootstrap_sketch_image') }}
+                    {% endif %}
+                </div>
+            </button>
+            {% if not disabled %}
+                <div class="modal fade" id="{{ id }}_modal" tabindex="-1" role="dialog" aria-labelledby="{{ id }}_title"
+                     aria-hidden="true">
+                    <div class="modal-dialog" style="width: {{ form.vars.modal_width }}px">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" data-sketch="dismiss">
+                                    <span aria-hidden="true">&times;</span>
+                                    <span class="sr-only">Close</span>
+                                </button>
+                                <h4 class="modal-title" id="{{ id }}_title">Modal title</h4>
+                            </div>
+                            <div class="modal-body">
+                                {{ block('hn_bootstrap_sketch_canvas') }}
+                            </div>
+                            <div class="modal-footer">
+                                <div class="pull-left">
+                                    <div class="btn-group">
+                                        <button type="button" class="btn btn-default"
+                                                {%- if read_only %} disabled="disabled"
+                                        {%- else %} data-sketch="clear"{%- endif %}>
+                                            {{ 'sketch.clear'|trans({}, translation_domain) }}
+                                        </button>
+                                        <button type="button" class="btn btn-default"
+                                                {%- if read_only %} disabled="disabled"
+                                        {%- else %} data-sketch="reset"{%- endif %}>
+                                            {{ 'sketch.reset'|trans({}, translation_domain) }}
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-default"
+                                            data-sketch="dismiss" data-dismiss="modal">
+                                        {{ 'sketch.close'|trans({}, translation_domain) }}
+                                    </button>
+                                    <button type="button" class="btn btn-primary"
+                                            {%- if read_only %} disabled="disabled"
+                                    {%- else %} data-sketch="save" data-dismiss="modal"{%- endif %}>
+                                        {{ 'sketch.save'|trans({}, translation_domain) }}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        {% else %}
+            {{ block('hn_bootstrap_sketch_canvas') }}
+        {% endif %}
+        {% if not read_only and not disabled %}
+            {% set attr = form.vars.file_attr %}
+            {{ block('hidden_widget') }}
+        {% endif %}
+    </div>
+{% endblock hn_bootstrap_sketch_widget %}
+
+{% block hn_bootstrap_tab_widget %}
+    {%- spaceless %}
+        {% set attr = attr|merge({ 'role': 'tabpanel' }) %}
+        <div {{ block('widget_container_attributes') }}>
+
+            {% set active_name = form.vars.active|default(form|first.vars.name) %}
+            {% set fade_effect = fade_effect|default(form.vars.fade_effect) %}
+
+            <ul class="nav nav-tabs" role="tablist">
+                {% for tab in form %}
+                    <li role="presentation"{% if tab.vars.name == active_name %} class="active"{% endif %}>
+                        <a href="#{{ tab.vars.id }}-tab" data-name="{{ tab.vars.name }}"
+                           aria-controls="{{ tab.vars.id }}" role="tab" data-toggle="tab">
+                            <span{% if tab.vars.name in form.vars.tabs_with_errors %} class="text-danger"{% endif %}>
+                                {%- if tab.vars.label is empty -%}
+                                    {{- tab.vars.name|humanize|trans({}, translation_domain) -}}
+                                {%- else -%}
+                                    {{- tab.vars.label|trans({}, translation_domain) -}}
+                                {%- endif -%}
+                            </span>
+                        </a>
+                    </li>
+                {% endfor %}
+            </ul>
+
+            <div class="tab-content">
+                {% for tab in form %}
+                    {% set class_name = fade_effect ? 'tab-pane fade' : 'tab-pane' %}
+                    {% if tab.vars.name == active_name %}
+                        {% set class_name = class_name ~ (fade_effect ? ' in active' : ' active') %}
+                    {% endif %}
+                    <div role="tabpanel" class="{{ class_name }}" id="{{ tab.vars.id }}-tab">
+                        {% if add_space is not defined or add_space %}
+                            <div class="form-group">{# adds a little space #}</div>
+                        {% endif %}
+                        {{ form_row(tab, { label: false }) }}
+                    </div>
+                {% endfor %}
+            </div>
+
+        </div>
+    {% endspaceless -%}
+{% endblock hn_bootstrap_tab_widget %}

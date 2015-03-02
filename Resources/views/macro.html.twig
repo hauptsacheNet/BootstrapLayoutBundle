@@ -1,0 +1,20 @@
+{% macro flying_close_btn(id, label) %}
+    {%- spaceless %}
+        {% set script = '$(' ~ ('#' ~ id)|json_encode ~ ').remove()' %}
+        {% set style = 'margin-right: -.8em; margin-left: -1em; position: relative; z-index: 1' %}
+        <button type="button" class="close" onclick="{{ script }}" style="{{ style }}">
+            <span aria-hidden="true">&times;</span>
+            <span class="sr-only">{{ label|default('Remove') }}</span>
+        </button>
+    {% endspaceless -%}
+{% endmacro flying_close_btn %}
+
+{% macro close_btn(id, label, class) %}
+    {%- spaceless %}
+        {% set script = '$(' ~ ('#' ~ id)|json_encode ~ ').remove()' %}
+        <button type="button" class="{{ class|default('btn btn-default') }}" onclick="{{ script }}">
+            <span class="glyphicon glyphicon-remove"></span>
+            {{ label|default('') }}
+        </button>
+    {% endspaceless -%}
+{% endmacro close_btn %}

@@ -1,0 +1,30 @@
+{
+  "name": "Hn/BoostrapLayoutBundle",
+  "type": "library",
+  "description": "TODO",
+  "license": "MIT",
+  "version": "1.0.0",
+  "authors": [
+    {
+      "name": "Kay Wienöbst",
+      "email": "kay@hauptsache.net"
+    },
+    {
+      "name": "Marco Pfeiffer",
+      "email": "marco@hauptsache.net"
+    },
+    {
+      "name": "Philipp Kretzschmar",
+      "email": "philipp@hauptsache.net"
+    }
+  ],
+  "require": {
+    "php": ">=5.3.3",
+    "symfony/symfony": "~2.4",
+    "suncat/mobile-detect-bundle": "~0.10"
+  },
+  "autoload": {
+    "psr-0": {"Hn\\BootstrapLayoutBundle": ""}
+  },
+  "target-dir": "Hn/BootstrapLayoutBundle"
+}

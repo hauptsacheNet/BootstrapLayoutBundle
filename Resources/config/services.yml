@@ -1,0 +1,82 @@
+services:
+    hn_bootstrap.abstract_date_time_picker_type:
+        class: Hn\BootstrapLayoutBundle\Form\AbstractDateTimePickerType
+        arguments: [@request_stack, @hn_bootstrap.date_pattern, @mobile_detect.mobile_detector]
+        abstract: true
+        private: true
+  
+    hn_bootstrap.date_type:
+        class: Hn\BootstrapLayoutBundle\Form\DateType
+        parent: hn_bootstrap.abstract_date_time_picker_type
+        tags:
+            - { name: form.type, alias: hn_bootstrap_date }
+
+    hn_bootstrap.datetime_type:
+        class: Hn\BootstrapLayoutBundle\Form\DateTimeType
+        parent: hn_bootstrap.abstract_date_time_picker_type
+        tags:
+            - { name: form.type, alias: hn_bootstrap_datetime }
+
+    hn_bootstrap.time_type:
+        class: Hn\BootstrapLayoutBundle\Form\TimeType
+        parent: hn_bootstrap.abstract_date_time_picker_type
+        tags:
+            - { name: form.type, alias: hn_bootstrap_time }
+
+    hn_bootstrap.date_range_type:
+        class: Hn\BootstrapLayoutBundle\Form\DateRangeType
+        tags:
+            - { name: form.type, alias: hn_bootstrap_date_range }
+
+            
+    hn_bootstrap.choice_with_text_type:
+        class: Hn\BootstrapLayoutBundle\Form\ChoiceWithTextType
+        tags:
+            - { name: form.type, alias: hn_bootstrap_choice_with_text }
+
+    hn_bootstrap.rte_type:
+        class: Hn\BootstrapLayoutBundle\Form\RteType
+        arguments: [@request_stack]
+        tags:
+            - { name: form.type, alias: hn_bootstrap_rte }
+    
+    hn_bootstrap.text_variables_type:
+        class: Hn\BootstrapLayoutBundle\Form\TextVariablesType
+        tags:
+            - { name: form.type, alias: hn_bootstrap_text_variables }
+            
+    hn_bootstrap.sketch_type:
+        class: Hn\BootstrapLayoutBundle\Form\SketchType
+        tags:
+            - { name: form.type, alias: hn_bootstrap_sketch }
+
+    hn_bootstrap.tab_type:
+        class: Hn\BootstrapLayoutBundle\Form\TabType
+        arguments: [@request_stack]
+        tags:
+            - { name: form.type, alias: hn_bootstrap_tab }
+            
+    hn_bootstrap.choice_type_extension:
+        class: Hn\BootstrapLayoutBundle\Form\ChoiceTypeExtension
+        arguments: [@mobile_detect.mobile_detector]
+        tags:
+            - { name: form.type_extension, alias: choice }
+    
+
+    
+
+
+    hn_bootstrap.variable_text_service:
+        class: Hn\BootstrapLayoutBundle\Service\VariableTextService
+
+
+    hn_bootstrap.variable_text_extension:
+        class: Hn\BootstrapLayoutBundle\Twig\VariableTextExtension
+        arguments: [@hn_bootstrap.variable_text_service]
+        tags:
+            - { name: twig.extension }
+
+
+    hn_bootstrap.date_pattern:
+        class: Hn\BootstrapLayoutBundle\Service\DatePatternService
+        arguments: [@request_stack, @logger]

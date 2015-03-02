@@ -1,0 +1,256 @@
+{% extends 'HnBootstrapLayoutBundle:form:fields.html.twig' %}
+
+{% block form_row %}
+    {%- spaceless %}
+        {% if delete_btn|default(false) %}
+            {% import 'HnBootstrapLayoutBundle::macro.html.twig' as bootstrap %}
+            {{ bootstrap.flying_close_btn(delete_btn) }}
+        {% endif %}
+
+        {% if compound and not simulated_input|default(false) %}
+            {{ form_label(form) }}
+            {{ form_widget(form) }}
+            {{ form_errors(form) }}
+        {% else %}
+            <div class="form-group{% if errors is not empty %} has-error{% endif %}">
+                {{ form_label(form) }}
+                {{ form_widget(form) }}
+                {{ form_errors(form) }}
+            </div>
+        {% endif %}
+    {% endspaceless %}
+{% endblock form_row %}
+
+{% block form_label_attributes %}
+    {%- for attrname, attrvalue in label_attr %} {{ attrname }}="{{ attrvalue }}"{% endfor -%}
+{% endblock form_label_attributes %}
+
+{% block form_label %}
+    {%- spaceless %}
+        {% if label is not sameas(false) %}
+            {% if not compound %}
+                {% set label_attr = label_attr|merge({'for': id}) %}
+            {% endif %}
+            {% if required %}
+                {% set label_attr = label_attr|merge({'class': (label_attr.class|default('') ~ ' required')|trim}) %}
+            {% endif %}
+
+            {% if compound and not simulated_input|default(false) %}
+                <{{ label_wrap|default('h3') }}{{ block('form_label_attribues') }}>
+                {{- block('form_label_text') -}}
+                <{{ '/' ~ label_wrap|default('h3') }}>
+            {% else %}
+                <label{{ block('form_label_attribues') }}>
+                    {{- block('form_label_text') -}}
+                    {%- if form.vars.required -%}
+                        <span class="required-star"> *</span>
+                    {%- endif -%}
+                </label>
+            {% endif %}
+        {% endif %}
+    {% endspaceless %}
+{% endblock form_label %}
+
+{% block form_widget_simple %}
+    {%- spaceless %}
+        {% set attr = attr|merge({ 'class': (attr.class|default('') ~ ' form-control')|trim }) %}
+        {% set attr = attr|merge({ 'title': attr.title|default(block('form_label_text')) }) %}
+        {% set type = type|default('text') %}
+        <input type="{{ type }}" {{ block('widget_attributes') }} {% if value is not empty %}value="{{ value }}" {% endif %}/>
+    {% endspaceless %}
+{% endblock %}
+
+{% block textarea_widget %}
+    {%- spaceless %}
+        {% set attr = attr|merge({ 'class': (attr.class|default('') ~ ' form-control')|trim }) %}
+        <textarea {{ block('widget_attributes') }} title="{{ block('form_label_text') }}">{{ value }}</textarea>
+    {% endspaceless %}
+{% endblock %}
+
+{% block form_errors %}
+    {%- spaceless %}
+        {% if errors|length > 0 %}
+            {% for error in errors %}
+                <p class="help-block">{{ error.message }}</p>
+            {% endfor %}
+        {% endif %}
+    {% endspaceless %}
+{% endblock form_errors %}
+
+{% block button_row %}
+    {%- spaceless %}
+        {% set label_width = label_width|default(4) %}
+        {#{% set attr = attr|merge({ 'class': (attr.class|default('') ~ ' form-control')|trim }) %}#}
+        <div class="form-group">
+            {{ form_widget(form) }}
+        </div>
+    {% endspaceless %}
+{% endblock button_row %}
+
+{% block button_widget %}
+    {%- spaceless %}
+        {% set btn_type = btn_type|default('default') %}
+        {% set class_name = (attr.class|default('') ~ ' btn btn-' ~ btn_type)|trim %}
+        {% set attr = attr|merge({ 'class': class_name }) %}
+        <button type="{{ type|default('button') }}" {{ block('button_attributes') }}>
+            {% if button_icon is defined and button_icon is not empty %}
+                <span class="glyphicon glyphicon-{{ button_icon }}"></span>
+            {% endif %}
+            {{ block('form_label_text') }}
+        </button>
+    {% endspaceless %}
+{% endblock button_widget %}
+
+{% block submit_widget %}
+    {% spaceless %}
+        {% set type = type|default('submit') %}
+        {% set btn_type = 'primary' %}
+        {% set button_icon = 'save' %}
+        {{ block('button_widget') }}
+    {% endspaceless %}
+{% endblock submit_widget %}
+
+{% block choice_row %}
+    {{ form_row(form, {simulated_input: true}) }}
+{% endblock choice_row %}
+
+{% block choice_widget %}
+    {%- spaceless %}
+        {% if expanded %}
+            {{ block('choice_widget_expanded') }}
+        {% else %}
+            {% set attr = attr|merge({ 'class': (attr.class|default('') ~ ' form-control')|trim }) %}
+            {{ block('choice_widget_collapsed') }}
+        {% endif %}
+    {% endspaceless %}
+{% endblock %}
+
+{% block choice_widget_expanded -%}
+    {%- spaceless %}
+        {%- for child in form %}
+            {{- form_row(child) -}}
+        {% endfor -%}
+    {% endspaceless -%}
+{% endblock choice_widget_expanded %}
+
+{% block checkbox_row %}
+    {%- spaceless %}
+        <div class="{{ type|default('checkbox') }}{% if disabled %} disabled{% endif %}">
+            {% if label is not sameas(false) -%}
+
+                {% if required -%}
+                    {% set label_attr = label_attr|merge({'class': (label_attr.class|default('') ~ ' required')|trim}) %}
+                {%- endif %}
+
+                <label{{ block('form_label_attribues') }}>
+                    {{- form_widget(form) -}}
+                    {{ block('form_label_text') }}
+                </label>
+            {% else %}
+                {{- form_widget(form) -}}
+            {%- endif %}
+        </div>
+
+        {{ form_errors(form) }}
+    {% endspaceless %}
+{% endblock checkbox_row %}
+
+{% block radio_row %}
+    {%- set type = 'radio' -%}
+    {{- block('checkbox_row') -}}
+{% endblock radio_row %}
+
+{% block collection_add_button %}
+    {%- spaceless %}
+        {% set btn_class = btn_class|default('btn btn-default') %}
+        {% set raw_label_text = 'add ' ~ (label|default(name|humanize)) %}
+        {% set btn_label = btn_label|default(raw_label_text|trans({}, translation_domain)|e) %}
+
+        {% if label is empty -%}
+            {% set label = name|humanize %}
+        {%- endif -%}
+        {# this requires https://github.com/carlalexander/symfony-collection.js #}
+        {# add this to bower dependencies if you need it #}
+        {# "symfony-collection.js": "https://github.com/hauptsacheNet/symfony-collection.js.git#febc5d5078ec7f59bc535b847664a55656bd01c5" #}
+        <button class="{{ btn_class }}" id="add-{{ id }}" type="button" data-add="collection" data-target="#{{ id }}">
+            {{ btn_label|raw }}
+        </button>
+    {% endspaceless -%}
+{% endblock collection_add_button %}
+
+{% block collection_row %}
+    {%- spaceless %}
+        {% set allow_add = form.vars.allow_add and allow_add|default(true) %}
+        {% set simulated_input = simulated_input|default(false) %}
+        {% set alternative_btn_position = alternative_btn_position|default(label is sameas(false) or simulated_input) %}
+
+        <div class="form-group{% if errors|length > 0 %} has-error{% endif %}">
+            {% if allow_add and not alternative_btn_position %}
+                {% set btn_class = btn_class|default('btn btn-link') %}
+                {% set btn_label = btn_label|default('<span class="glyphicon glyphicon-plus"></span>') %}
+            {% endif %}
+
+            {% if label is not sameas(false) %}
+                <{{ label_wrap|default(simulated_input ? 'label' : 'h3') }}>
+                {%- if allow_add and not alternative_btn_position and prototype is defined -%}
+                    <div class="pull-right">
+                        {{ block('collection_add_button') }}
+                    </div>
+                {%- endif -%}
+                {{- block('form_label_text') -}}
+                <{{ '/' ~ label_wrap|default(simulated_input ? 'label' : 'h3') }}>
+            {% else %}
+                {% if allow_add and not alternative_btn_position and prototype is defined %}
+                    <div class="pull-right">
+                        {{ block('collection_add_button') }}
+                    </div>
+                {% endif %}
+            {% endif %}
+
+            {{ form_widget(form) }}
+            {{ form_errors(form) }}
+
+            {% if allow_add and alternative_btn_position and prototype is defined %}
+                {{ block('collection_add_button') }}
+            {% endif %}
+        </div>
+    {% endspaceless %}
+{% endblock %}
+
+{# this collection type handles addition and removal of #}
+{% block collection_widget %}
+    {%- spaceless %}
+        {% set widget_row = widget_row|default('collection_widget_row') %}
+
+        {% set attr = attr|merge({
+        'class': (attr.class|default('') ~ ' row')|trim,
+        }) %}
+
+        {%- if prototype is defined -%}
+            {%- set row = prototype -%}
+            {% set attr = attr|merge({
+            'data-index': form|keys|last + 1,
+            'data-prototype-name': prototype.vars.name,
+            'data-prototype': block(widget_row)
+            }) %}
+        {%- endif -%}
+
+        <div {{ block('widget_container_attributes') }}>
+
+            {% for row in form %}
+                {{ block(widget_row) }}
+            {% endfor %}
+            {{ form_errors(form) }}
+        </div>
+    {% endspaceless %}
+{% endblock %}
+
+{% block collection_widget_row %}
+    {%- spaceless %}
+        {% set container_id = row.vars.id ~ '-container' %}
+        <div id="{{ container_id }}" class="{{ col_class|default('col-sm-12') }}">
+            {% set delete_btn = form.vars.allow_delete or row.vars.value is empty ? container_id : false %}
+            {{ form_row(row, { label: false, delete_btn: delete_btn }) }}
+        </div>
+    {% endspaceless -%}
+{% endblock collection_widget_row %}
